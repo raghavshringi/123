@@ -1,0 +1,311 @@
+<!DOCTYPE HTML>
+<html lang="en-gb">
+<head>
+<title>Bubble Sort Game | Interactive | Computing</title>
+<meta name="robots" content="index, follow">
+<meta name="author" content="Andrew Virnuls">
+<meta name="description" content="Remember how a bubble sort works by doing it yourself!">
+<link href="/style/screen.css" rel="stylesheet" type="text/css" media="screen">
+<link href="/style/print.css" rel="stylesheet" type="text/css" media="print">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#37143F">
+<meta property="og:site_name" content="Computing and ICT in a Nutshell">
+<meta property="og:title" content="Bubble Sort Game">
+<meta property="og:type" content="website">
+<meta property="og:description" content="Check your understanding of how bubble sort works with this interactive game.">
+<meta property="og:locale" content="en_GB">    
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://www.advanced-ict.info",
+      "name": "Home",
+      "image": "https://www.advanced-ict.info/graphics/logo_small.png"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://www.advanced-ict.info/interactive/index.html",
+      "name": "Interactive"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://www.advanced-ict.info/interactive/bubble_sort.html",
+      "name": "Bubble Sort Game"
+    }
+  }]
+}
+</script>
+<style>
+#container  {width: 100%; height: 363px; text-align: center}
+#bars       {width: 90%; max-width: 800px; border: 1px solid black; height: 360px; position: relative; display: inline-block; vertical-align: middle; margin: auto}
+.bar        {width: 8%; margin: 0 1%; background-color: #777777; color: white; position: absolute; bottom: 5px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3px}
+#controls   {margin: 20px; width: 520px; max-width: calc(95vw - 40px); vertical-align: middle; display: inline-block}
+#commentary {height: 105px; vertical-align: middle; width: auto; text-align: center}
+#question   {display: inline-block; width: 220px}
+body:after	{display: none}
+</style>
+<SCRIPT>
+<!--
+var bar;
+var current;
+var pen = 2;
+var colour = new Array("#777777", "#37143F")
+var question = new Array("Swap the highlighted numbers?", "Is another pass required?")
+var yes = new Array("Yes", "Well done", "Right", "Good call");
+var no = new Array("Sorry", "No", "Bad luck");
+var swap_text = new Array();
+swap_text[false] = "No swaps have been made on this pass.";
+swap_text[true] = "Swaps have been made this pass.";
+var choice_text = new Array();
+choice_text[false] = no;
+choice_text[true] = yes;
+var game_over, swaps, penalty, start_time, correct, again;
+
+function time_now()
+{
+	var d = new Date();
+	return d.getTime();
+}
+
+function init()
+{
+  var number = new Array();
+  var i;
+  while(number.length < 10)
+  {
+    i = Math.floor(Math.random() * 94) + 6;
+    if(number.includes(i) == false) { number.push(i); }
+  }
+  bar = document.getElementsByClassName("bar");
+  for(i = 0; i < 10; i++) 
+  { 
+    bar[i].innerHTML = number[i];
+    bar[i].style.left = i*10 + "%";
+    bar[i].style.height = number[i] * 3.5 + "px";
+    bar[i].style.backgroundColor = colour[0];
+  }
+  current = 0;
+  bar[0].style.backgroundColor = colour[1];
+  bar[1].style.backgroundColor = colour[1];
+  document.onkeydown = key_pressed;
+  game_over = false;
+  swaps = false;
+  penalty = 0;
+  start_time = time_now();
+  correct = true;
+  again = false;
+  document.getElementById("commentary").innerHTML = "You can press <em>Y</em> or <em>N</em> on the keyboard or use the buttons to make your choice.";
+  document.getElementById("question").innerHTML = question[0];
+  document.getElementById("yes").setAttribute('onclick','swap()');
+  document.getElementById("no").setAttribute('onclick','stick()');
+}
+
+function swap()
+{
+  if(!game_over)
+  {
+    if(bar[current+1].innerHTML*1 < bar[current].innerHTML*1)
+    {
+      swaps = true;
+      var temp = bar[current].innerHTML;
+      bar[current].innerHTML = bar[current+1].innerHTML;
+      bar[current+1].innerHTML = temp;
+      var text = bar[current+1].innerHTML + " and " + bar[current].innerHTML + " should be swapped. "
+      bar[current].style.height = bar[current].innerHTML * 3.5 + "px";
+      bar[current+1].style.height = bar[current+1].innerHTML * 3.5 + "px";
+      document.getElementById("commentary").innerHTML = choice_text[correct][Math.floor(Math.random() * choice_text[correct].length)] + " - " + text + swap_text[swaps];
+      if(current < 8)
+      { 
+        bar[current].style.backgroundColor = colour[0];
+        current++;
+        bar[current+1].style.backgroundColor = colour[1];
+      }
+      else
+      {
+        another_pass();
+      }
+      correct = true;
+    }
+    else
+    {
+      penalty += pen;
+      correct = false;
+      stick();
+    }
+  }
+}
+
+function stick()
+{
+  if(!game_over)
+  {
+    if(bar[current+1].innerHTML*1 > bar[current].innerHTML*1)
+    {
+      var text = bar[current].innerHTML + " and " + bar[current+1].innerHTML + " shouldn't be swapped. "
+      document.getElementById("commentary").innerHTML = choice_text[correct][Math.floor(Math.random() * choice_text[correct].length)] + " - " + text + swap_text[swaps];
+      if(current < 8)
+      { 
+        bar[current].style.backgroundColor = colour[0];
+        current++;
+        bar[current+1].style.backgroundColor = colour[1]; 
+      }
+      else
+      {
+        another_pass();
+      }
+      correct = true;
+    }
+    else
+    {
+      penalty += pen;
+      correct = false;
+      swap();
+    }
+  }
+}
+
+function ask_again(answer)
+{
+  if(!game_over)
+  {
+    var text = new Array();
+    text[false] = "there were no swaps in the last pass so we can finish here.";
+    text[true] = "there were swaps in the last pass so we need to try again.";
+    if(answer == swaps) 
+    {
+      document.getElementById("commentary").innerHTML = yes[Math.floor(Math.random() * yes.length)] + " - " + text[swaps];
+    }
+    else
+    {
+      document.getElementById("commentary").innerHTML = no[Math.floor(Math.random() * no.length)] + " - " + text[swaps];
+      penalty += pen;
+    }
+    again = false;
+    if(swaps) { start_pass(); } else { end_game(answer == swaps); }
+  }
+}
+
+function another_pass()
+{
+  document.getElementById("question").innerHTML = question[1];
+  document.getElementById("yes").setAttribute('onclick','ask_again(true)');
+  document.getElementById("no").setAttribute('onclick','ask_again(false)');
+  again = true;
+}
+
+function start_pass()
+{
+  bar[current].style.backgroundColor = colour[0];
+  bar[current+1].style.backgroundColor = colour[0];
+  current = 0;
+  swaps = false;
+  bar[0].style.backgroundColor = colour[1];
+  bar[1].style.backgroundColor = colour[1];
+  document.getElementById("question").innerHTML = question[0];
+  document.getElementById("yes").setAttribute('onclick','swap()');
+  document.getElementById("no").setAttribute('onclick','stick()');
+}
+
+function end_game(correct)
+{
+  var prefix = new Array();
+  prefix[true] = "Yes";
+  prefix[false] = "Sorry";
+  var time_taken = Math.round((time_now() - start_time) / 1000);
+  game_over = true;
+  var text = prefix[correct] + " - there were no swaps in the last pass so we can stop.  The numbers were successfully sorted in " + time_taken + " seconds."
+  if(penalty > 0) { text += " There is a penalty of " + penalty + " seconds for incorrect choices, making a total of " + (time_taken + penalty) + " seconds."; }
+  text += "<br><input type=button value='Play Again' onclick='init()' style='margin-top: 5px'>"
+  document.getElementById("commentary").innerHTML = text;
+}
+
+function key_pressed(event)
+{
+	var ev = event || window.event;
+	var tile, next;
+  if(again)
+  {
+    if(ev.key == "y" || ev.key == "Y") {	ask_again(true); }
+    if(ev.key == "n" || ev.key == "N") {	ask_again(false); }
+  }
+  else
+  {
+    if(ev.key == "y" || ev.key == "Y") {	swap(); }
+    if(ev.key == "n" || ev.key == "N") {	stick(); }
+  }
+}
+//-->
+</SCRIPT>
+</head>
+
+<BODY onload="init()">
+﻿
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "EducationalOrganization",
+  "name" : "Computing and ICT in a Nutshell",
+  "url" : "https://www.advanced-ict.info",
+  "logo": "https://www.advanced-ict.info/graphics/logo_small.png",
+  "brand": "Computing and ICT in a Nutshell",
+  "isAccessibleForFree": true,
+  "founder": "Andrew Virnuls",
+  "foundingDate": "2001-11-07",
+  "sameAs" : [
+    "https://www.facebook.com/ComputingNutshell",
+    "https://twitter.com/advanced_ict",
+    "https://www.youtube.com/@advanced_ict",
+	"https://www.linkedin.com/company/computingnutshell",
+	"https://replit.com/@virnuls",
+	"https://scratch.mit.edu/users/virnuls/"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "WebSite",
+  "name": "Computing and ICT in a Nutshell",
+  "alternateName": "Computing in a Nutshell",
+  "url": "https://www.advanced-ict.info/",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://www.advanced-ict.info/home/search.html?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<article>
+<header>
+<h1>Bubble Sort Game</h1>
+</header>
+<p>Play this interactive bubble sort game to check your understanding of the bubble sort algorithm - there are also similar games for insertion and merge sorts.  Should the highlighted numbers be swapped?  You will be timed to see how long you take to complete the sort, and there will be a two-second penalty for each incorrect decision.</p>
+<div id="container">
+<div id="bars">
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+</div>
+<div id="controls">
+<div id="question">Swap the highlighted numbers?</div> <input type="button" id="yes" value="Yes" onclick="swap()"> <input type="button" value="No" id="no" onclick="stick()">
+<p id="commentary"></p>
+</div></div>
+</article>
+</BODY>
+</HTML>
